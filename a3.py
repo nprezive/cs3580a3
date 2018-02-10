@@ -23,15 +23,14 @@ def basicInfo():
 
 def pandasTest():
     df = pd.read_csv("flavors_of_cacao.csv")
-    thingy = df.rename(index=str, columns={"Company \n(Maker-if known)":"Company", 
-                        "Specific Bean Origin\nor Bar Name":"Specific Origin", 
-                        "Review\nDate":"Review Date", 
-                        "Cocoa\nPercent":"Cocoa Percent", 
-                        "Company\nLocation":"Company Location", 
-                        "Bean\nType":"Bean Type", 
-                        "Broad Bean\nOrigin":"Broad Origin"})
-    thingy2 = df.rename(index=int, columns={1:"Company"})
-    print(thingy2)
+    df = df.rename(columns={df.columns[0]:"Company",
+                                df.columns[1]:"Specific Origin", 
+                                df.columns[3]:"Review Date", 
+                                df.columns[4]:"Cocoa Percent", 
+                                df.columns[5]:"Company Location", 
+                                df.columns[7]:"Bean Type", 
+                                df.columns[8]:"Broad Origin"})
+    print(df)
 
 # Run program
 # basicInfo()
