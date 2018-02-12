@@ -60,37 +60,47 @@ def univariateValues():
 
     # Mode of Bean Type
     beanTypeMode = (df[df.Bean_Type != '\xa0'])['Bean_Type'].mode()
-    print('\tMode of bean type: {0}'.format(beanTypeMode.to_string(index=False)))
+    print('\tMode of bean type: {0}'
+              .format(beanTypeMode.to_string(index=False)))
 
     # Mode of Broad Origin
     broadOriginMode = df['Broad_Origin'].mode()
-    print('\tMode of broad bean origin: {0}'.format(broadOriginMode.to_string(index=False)))
+    print('\tMode of broad bean origin: {0}'
+              .format(broadOriginMode.to_string(index=False)))
 
     # Mode of Company Location
     companyLocationMode = df['Company_Location'].mode()
-    print('\tMode of company location: {0}'.format(companyLocationMode.to_string(index=False)))
+    print('\tMode of company location: {0}'
+              .format(companyLocationMode.to_string(index=False)))
 
 
 def firstCorrelations():
     print('\nFirst Correlation:')
 
+    # Correlation between % cacao and rating
     corrPercentCacaoAndRating = df['Cacao_Percent'].corr(df['Rating'])
-    print('\tCorrelation between percent of cacao and rating: {0:.3f}'.format(corrPercentCacaoAndRating))
-    #scatter plot
+    print('\tCorrelation between percent of cacao and rating: {0:.3f}'
+              .format(corrPercentCacaoAndRating))
+    
+    # scatter plot and regression line
     plt.title('Correlation between percent of cacao and rating')
     plt.xlabel('% Cacao')
     plt.ylabel('Rating')
-    #regression line
     fit = np.polyfit(df['Cacao_Percent'], df['Rating'], 1)
     fit_fn = np.poly1d(fit) 
-    plt.plot(df['Cacao_Percent'], df['Rating'], 'yo', df['Cacao_Percent'], fit_fn(df['Cacao_Percent']), '--k')
+    plt.plot(df['Cacao_Percent'], df['Rating'], 'go', 
+             df['Cacao_Percent'], fit_fn(df['Cacao_Percent']), '--k')
     plt.show()
-    print("\tWith a correlation coefficient so small, it looks like there's no correlation between the two.")
+    
+    # Explanation
+    print("\tWith a correlation coefficient so small, it looks like there's \
+no correlation between the two.")
 
 
 def secondCorrelations():
     print('\nSecond Correlation:')
 
+    # Correlation matrix
     fiveRandomCompanies = random.sample(set(df['Company']), 5)
     dummies = pd.get_dummies(df['Company'])
     new_df = df['Rating']
@@ -100,32 +110,52 @@ def secondCorrelations():
 
     print('\n\tCorrelation matrix of 5 companies and rating:')
     print(df_corr)
-    print("\n\tThe Rating column of this matrix tells us the strength of the relationship \
-between whether or not a chocolate is from a particular company (a boolean) \
-and its rating. Because there are many companies that make chocolates with high \
-and low ratings, knowing the company is not enough to determine the rating \
-and/or knowing the rating isn't enough to determine the company. Therefore, the \
-correlations are quite low.")
+    
+    # Explanation
+    print("\n\tThe Rating column of this matrix tells us the strength of the \
+relationship between whether or not a chocolate is from a particular company \
+(a boolean) and its rating. Because there are many companies that make \
+chocolates with high and low ratings, the relationship between whether or not \
+a chocolate is from a particular company (a boolean) and the ratings is very \
+weak. Therefore, the correlations are quite low.\n")
 
+    # Find the company with the highest correlation
     corr_dict = dict(df_corr['Rating'])
     for k, v in corr_dict.items():
         corr_dict[k] = abs(v)
-    highestCorrCompany = sorted(corr_dict.items(), key=lambda x:x[1], reverse=True)[1]
+    highestCorrCompany = sorted(corr_dict.items(), 
+                                key=lambda x:x[1], 
+                                reverse=True)[1]
     
-    print(highestCorrCompany)
+    print(new_df[['Rating', highestCorrCompany[0]]])
 
+    # scatter plot and linear regression line
+    plt.title('Correlation between rating and whether or not the chocolate is \
+from {0}'.format(highestCorrCompany[0]))
+    plt.xlabel('Is from {0} (1) or not (0)'.format(highestCorrCompany[0]))
+    plt.xticks(np.arange(0, 2, 1))
+    plt.ylabel('Rating')
+    fit = np.polyfit(new_df[highestCorrCompany[0]], new_df['Rating'], 1)
+    fit_fn = np.poly1d(fit)
+    plt.plot(new_df[highestCorrCompany[0]], new_df['Rating'], 'go',
+             new_df[highestCorrCompany[0]], 
+                 fit_fn(new_df[highestCorrCompany[0]]), '--k')
+    plt.show()
 
-    # filtered_df = df[df.Company.isin(fiveRandomComapnies)]
-    # dummies = pd.get_dummies(filtered_df['Company'])
-    # filtered_df = filtered_df[['Rating']]
-    # df_new = pd.concat([filtered_df, dummies], axis=1)
-    # print(df_new)
-    # print(df_new.corr())
+    # Another way of doing it: filter the dataset down to just the companies
+    # we have data for. Not sure which is correct, since I'm a statistics noob.
+    
+#    filtered_df = df[df.Company.isin(fiveRandomCompanies)]
+#    dummies = pd.get_dummies(filtered_df['Company'])
+#    filtered_df = filtered_df[['Rating']]
+#    df_new = pd.concat([filtered_df, dummies], axis=1)
+#    print(df_new.corr())
+#    print(df_new)
 
 
 # Run program
-# chocolateRatings()
-# top5Countries()
-# univariateValues()
-# firstCorrelations()
+chocolateRatings()
+top5Countries()
+univariateValues()
+firstCorrelations()
 secondCorrelations()
