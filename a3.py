@@ -112,7 +112,8 @@ def secondCorrelations():
     print(df_corr)
     
     # Explanation
-    print("\n\tThe Rating column of this matrix tells us the strength of the \
+    print("\n\tExplanation:")
+    print("\tThe Rating column of this matrix tells us the strength of the \
 relationship between whether or not a chocolate is from a particular company \
 (a boolean) and its rating. Because there are many companies that make \
 chocolates with high and low ratings, the relationship between whether or not \
@@ -122,24 +123,25 @@ weak. Therefore, the correlations are quite low.\n")
     # Find the company with the highest correlation
     corr_dict = dict(df_corr['Rating'])
     for k, v in corr_dict.items():
-        corr_dict[k] = abs(v)
-    highestCorrCompany = sorted(corr_dict.items(), 
-                                key=lambda x:x[1], 
-                                reverse=True)[1]
-    
-    print(new_df[['Rating', highestCorrCompany[0]]])
+        corr_dict[k] = (abs(v), 1 if v>=0 else -1)
+    sortedCorrDict = sorted(corr_dict.items(), 
+                                key=lambda x:x[1][0], 
+                                reverse=True)
+    highestCorrCompany = sortedCorrDict[1][0]
+    r_value = sortedCorrDict[1][1][0] * sortedCorrDict[1][1][1]
 
     # scatter plot and linear regression line
     plt.title('Correlation between rating and whether or not the chocolate is \
-from {0}'.format(highestCorrCompany[0]))
-    plt.xlabel('Is from {0} (1) or not (0)'.format(highestCorrCompany[0]))
+from {0}'.format(highestCorrCompany))
+    plt.xlabel('Is from {0} (1) or not (0)'.format(highestCorrCompany))
     plt.xticks(np.arange(0, 2, 1))
     plt.ylabel('Rating')
-    fit = np.polyfit(new_df[highestCorrCompany[0]], new_df['Rating'], 1)
+    plt.text(.4, 4.75, 'r: {0:.3f}'.format(r_value))
+    fit = np.polyfit(new_df[highestCorrCompany], new_df['Rating'], 1)
     fit_fn = np.poly1d(fit)
-    plt.plot(new_df[highestCorrCompany[0]], new_df['Rating'], 'go',
-             new_df[highestCorrCompany[0]], 
-                 fit_fn(new_df[highestCorrCompany[0]]), '--k')
+    plt.plot(new_df[highestCorrCompany], new_df['Rating'], 'go',
+             new_df[highestCorrCompany], 
+                 fit_fn(new_df[highestCorrCompany]), '--k')
     plt.show()
 
     # Another way of doing it: filter the dataset down to just the companies
@@ -153,9 +155,37 @@ from {0}'.format(highestCorrCompany[0]))
 #    print(df_new)
 
 
+def independentThought():
+    print('\nIndependent Thought:')
+    print('\tQuestion:')
+    print('\tWhat are the correlations between broad bean origin and rating?')
+    
+    top5broad_df = (df[df.Broad_Origin != '\xa0']) \
+                    .groupby(['Broad_Origin'], as_index=False)[['REF']].count() \
+                    .sort_values('REF', ascending=False) \
+                    .head(5)
+    top5list = list(top5broad_df['Broad_Origin'])
+    
+    dummies = pd.get_dummies(df['Broad_Origin'])
+    new_df = df[['Rating', 'Broad_Origin']]
+    for c in top5list:
+        new_df = pd.concat([new_df, dummies[c]], axis=1)
+        
+    print('\tCorrelation matrix for the top 5 broad bean origins:\n')
+    print(new_df.corr())
+    
+    # Alternate way: filter down the dataset to the top 5 countries
+#    print(new_df[new_df.Broad_Origin.isin(top5list)].corr())
+    
+    print('\n\tExplanation:')
+    print("\tThe correlations are all very small. There is no relationship \
+between Broad Bean Origin and rating.")
+
+
 # Run program
 chocolateRatings()
 top5Countries()
 univariateValues()
 firstCorrelations()
 secondCorrelations()
+independentThought()
