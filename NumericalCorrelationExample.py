@@ -29,7 +29,6 @@ webbrowser.open('file://' + os.path.realpath("tableExample.html"))
 plt.rcParams['figure.figsize'] = [16, 6]
 
 fig, ax = plt.subplots(nrows=1, ncols=3)
-print("fig: " + str(fig))
 
 ax=ax.flatten()
 

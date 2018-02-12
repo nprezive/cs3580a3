@@ -1,8 +1,8 @@
-#import matplotlib
 from collections import defaultdict
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
 df = pd.read_csv("flavors_of_cacao.csv", 
@@ -71,8 +71,8 @@ def univariateValues():
     print('\tMode of company location: {0}'.format(companyLocationMode.to_string(index=False)))
 
 
-def correlations():
-    print('\nCorrelations:')
+def firstCorrelations():
+    print('\nFirst Correlation:')
 
     corrPercentCacaoAndRating = df['Cacao_Percent'].corr(df['Rating'])
     print('\tCorrelation between percent of cacao and rating: {0:.3f}'.format(corrPercentCacaoAndRating))
@@ -87,11 +87,45 @@ def correlations():
     plt.show()
     print("\tWith a correlation coefficient so small, it looks like there's no correlation between the two.")
 
+
+def secondCorrelations():
+    print('\nSecond Correlation:')
+
+    fiveRandomCompanies = random.sample(set(df['Company']), 5)
+    dummies = pd.get_dummies(df['Company'])
+    new_df = df['Rating']
+    for c in fiveRandomCompanies:
+        new_df = pd.concat([new_df, dummies[c]], axis=1)
+    df_corr = new_df.corr()
+
+    print('\n\tCorrelation matrix of 5 companies and rating:')
+    print(df_corr)
+    print("\n\tThe Rating column of this matrix tells us the strength of the relationship \
+between whether or not a chocolate is from a particular company (a boolean) \
+and its rating. Because there are many companies that make chocolates with high \
+and low ratings, knowing the company is not enough to determine the rating \
+and/or knowing the rating isn't enough to determine the company. Therefore, the \
+correlations are quite low.")
+
+    corr_dict = dict(df_corr['Rating'])
+    for k, v in corr_dict.items():
+        corr_dict[k] = abs(v)
+    highestCorrCompany = sorted(corr_dict.items(), key=lambda x:x[1], reverse=True)[1]
     
+    print(highestCorrCompany)
+
+
+    # filtered_df = df[df.Company.isin(fiveRandomComapnies)]
+    # dummies = pd.get_dummies(filtered_df['Company'])
+    # filtered_df = filtered_df[['Rating']]
+    # df_new = pd.concat([filtered_df, dummies], axis=1)
+    # print(df_new)
+    # print(df_new.corr())
 
 
 # Run program
 # chocolateRatings()
 # top5Countries()
 # univariateValues()
-correlations()
+# firstCorrelations()
+secondCorrelations()
